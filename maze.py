@@ -2,6 +2,7 @@ import heapq
 import math
 import pygame
 
+
 # Node class to represent positions in the maze
 class Node:
     def __init__(self, x, y, radius=10, color=(255, 0, 0)):
@@ -28,46 +29,47 @@ class Node:
 
         # Draw the circle
         pygame.draw.circle(surface, color, (self.x, self.y), self.radius)
-        
+
         # Draw the index number if it exists
         if self.index is not None:
-            font = pygame.font.SysFont('Arial', 12)
+            font = pygame.font.SysFont("Arial", 12)
             text = font.render(str(self.index), True, (0, 0, 0))
             text_rect = text.get_rect(center=(self.x, self.y))
             surface.blit(text, text_rect)
 
+
 # Define node positions
 nodes = [
-    Node(90, 72),   # start node
-    Node(152, 72), 
-    Node(190, 72), 
-    Node(152, 160), 
-    Node(53, 160),  
-    Node(53, 250),  
+    Node(90, 72),  # start node
+    Node(152, 72),
+    Node(190, 72),
+    Node(152, 160),
+    Node(53, 160),
+    Node(53, 250),
     Node(152, 250),
-    Node(152, 348), 
-    Node(53, 348),  
-    Node(53, 440),  
-    Node(53, 528),  
-    Node(53, 630),  
-    Node(152, 630), 
-    Node(220, 630), 
-    Node(220, 533),       
-    Node(290, 533), 
-    Node(220, 440), 
-    Node(120, 440), 
-    Node(120, 528), 
-    Node(155, 528), 
-    Node(220, 348), 
-    Node(290, 348), 
-    Node(290, 440), 
+    Node(152, 348),
+    Node(53, 348),
+    Node(53, 440),
+    Node(53, 528),
+    Node(53, 630),
+    Node(152, 630),
+    Node(220, 630),
+    Node(220, 533),
+    Node(290, 533),
+    Node(220, 440),
+    Node(120, 440),
+    Node(120, 528),
+    Node(155, 528),
+    Node(220, 348),
+    Node(290, 348),
+    Node(290, 440),
     Node(390, 440),
-    Node(390, 533), 
-    Node(358, 533), 
+    Node(390, 533),
+    Node(358, 533),
     Node(358, 630),
-    Node(290, 630), 
-    Node(320, 348), 
-    Node(390, 348), 
+    Node(290, 630),
+    Node(320, 348),
+    Node(390, 348),
     Node(390, 250),
     Node(320, 250),
     Node(223, 250),
@@ -77,9 +79,9 @@ nodes = [
     Node(287, 72),
     Node(390, 72),
     Node(255, 72),
-    Node(458, 533), 
-    Node(458, 440), 
-    Node(458, 348), 
+    Node(458, 533),
+    Node(458, 440),
+    Node(458, 348),
     Node(525, 348),
     Node(525, 250),
     Node(525, 213),
@@ -124,7 +126,7 @@ nodes = [
     Node(773, 495),
     Node(665, 400),
     Node(703, 400),
-    Node(880, 535), # finish
+    Node(880, 535),  # finish
 ]
 
 # Set indices for all nodes
@@ -218,8 +220,9 @@ connections = {
     83: [82],
     84: [62, 82, 85],
     85: [84],
-    86: [77]
+    86: [77],
 }
+
 
 class AStar:
     def __init__(self, start_idx, goal_idx):
@@ -227,14 +230,14 @@ class AStar:
         self.goal_idx = goal_idx
         self.start_node = nodes[start_idx]
         self.goal_node = nodes[goal_idx]
-        
+
     def heuristic(self, node1, node2):
-        # Euclidean distance heuristic
-        return math.sqrt((node1.x - node2.x)**2 + (node1.y - node2.y)**2)
-    
+        # Manhattan distance
+        return abs(node1.x - node2.x) + abs(node1.y - node2.y)
+
     def get_neighbors(self, node_idx):
         return connections.get(node_idx, [])
-    
+
     def reconstruct_path(self, came_from, current_idx):
         path = []
         while current_idx in came_from:
@@ -243,31 +246,31 @@ class AStar:
         path.append(self.start_idx)
         path.reverse()
         return path
-    
+
     def search(self, gui_callback=None):
         # Initialize open and closed sets
         open_set = []
         closed_set = set()
-        
+
         # Initialize g_score and f_score dictionaries
         g_score = {self.start_idx: 0}
         f_score = {self.start_idx: self.heuristic(self.start_node, self.goal_node)}
-        
+
         # Add start node to open set
         heapq.heappush(open_set, (f_score[self.start_idx], self.start_idx))
-        
+
         # Dictionary to store the path
         came_from = {}
-        
+
         while open_set:
             # Get node with lowest f_score
             current_f, current_idx = heapq.heappop(open_set)
             current_node = nodes[current_idx]
-            
+
             # Visualize current node being explored
             if gui_callback:
                 gui_callback(current_idx, "exploring")
-            
+
             # Check if we reached the goal
             if current_idx == self.goal_idx:
                 path = self.reconstruct_path(came_from, current_idx)
@@ -276,29 +279,36 @@ class AStar:
                     for node_idx in path:
                         gui_callback(node_idx, "path")
                 return path
-            
+
             # Add current node to closed set
             closed_set.add(current_idx)
-            
+
             # Check all neighbors
             for neighbor_idx in self.get_neighbors(current_idx):
                 if neighbor_idx in closed_set:
                     continue
-                
+
                 # Calculate tentative g_score
-                tentative_g_score = g_score[current_idx] + self.heuristic(current_node, nodes[neighbor_idx])
-                
+                tentative_g_score = g_score[current_idx] + self.heuristic(
+                    current_node, nodes[neighbor_idx]
+                )
+
                 # Visualize neighbor being considered
                 if gui_callback:
                     gui_callback(neighbor_idx, "considering")
-                
-                if neighbor_idx not in g_score or tentative_g_score < g_score[neighbor_idx]:
+
+                if (
+                    neighbor_idx not in g_score
+                    or tentative_g_score < g_score[neighbor_idx]
+                ):
                     # This path is better, record it
                     came_from[neighbor_idx] = current_idx
                     g_score[neighbor_idx] = tentative_g_score
-                    f_score[neighbor_idx] = tentative_g_score + self.heuristic(nodes[neighbor_idx], self.goal_node)
-                    
+                    f_score[neighbor_idx] = tentative_g_score + self.heuristic(
+                        nodes[neighbor_idx], self.goal_node
+                    )
+
                     if neighbor_idx not in [idx for _, idx in open_set]:
                         heapq.heappush(open_set, (f_score[neighbor_idx], neighbor_idx))
-        
-        return None  # No path found 
+
+        return None  # No path found
