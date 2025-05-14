@@ -59,27 +59,32 @@ def determine_direction(dx, dy):
             return 'right'  # Default case
 
 def update_node_state(node_idx, state):
+    global search_started  # Access the main loop variable
     nodes[node_idx].state = state
-    # Draw everything
+    
+    # Redraw everything
     screen.blit(background, (0, 0))
-
+    
     # Draw connections
-    for node_idx, neighbors in connections.items():
-        start_node = nodes[node_idx]
+    for idx, neighbors in connections.items():
+        start_node = nodes[idx]
         for neighbor_idx in neighbors:
             end_node = nodes[neighbor_idx]
-            pygame.draw.line(
-                screen,
-                (0, 0, 0),
-                (start_node.x, start_node.y),
-                (end_node.x, end_node.y),
-                2,
-            )
-
-    # Draw all nodes
+            pygame.draw.line(screen, (0, 0, 0), (start_node.x, start_node.y), (end_node.x, end_node.y), 2)
+    
+    # Draw nodes
     for node in nodes:
         node.draw(screen)
-
+    
+    # Draw rat on start node DURING SEARCH
+    if search_started:
+        # draw the rat on the start node
+        start_node = nodes[0] 
+        # facing at start in right
+        rat_img = rat_images['right'] 
+        rat_rect = rat_img.get_rect(center=(start_node.x, start_node.y))
+        screen.blit(rat_img, rat_rect)
+    
     pygame.display.flip()
     time.sleep(0.1)
 
@@ -136,6 +141,8 @@ while running:
             current_segment += 1
             if current_segment >= len(current_path) - 1:
                 animating = False
+                current_rat_image = rat_images[determine_direction(0, 0)]
+                start_pos = (end_node.x, end_node.y)
             else:
                 start_node = nodes[current_path[current_segment]]
                 end_node = nodes[current_path[current_segment + 1]]
