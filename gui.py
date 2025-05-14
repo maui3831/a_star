@@ -24,35 +24,35 @@ class Node:
 # Define node positions (you can adjust these coordinates based on your maze)
 nodes = [
     Node(90, 72),   
-    Node(152, 72), # down 1
-    Node(190, 72), # center 1  
-    Node(152, 160), # left 1
-    Node(53, 160),  # down 2
-    Node(53, 250),  # right 1
-    Node(152, 250), # down 3
-    Node(152, 348), # left 2
-    Node(53, 348),  # down 4
-    Node(53, 440),  # down 5
-    Node(53, 528),  # down 6
-    Node(53, 625),  # down 7
-    Node(152, 625), # right 2
-    Node(220, 625), # right 3
-    Node(220, 533), # up 1       
-    Node(290, 533), # right 4
-    Node(220, 440), # up 2
-    Node(120, 440), # left 3
-    Node(120, 528), # down 8
-    Node(155, 528), # right 5
-    Node(220, 348), # up 3
-    Node(290, 348), # right 6
-    Node(290, 440), # down 9
-    Node(390, 440), # right 7
-    Node(390, 533), # down 10
-    Node(358, 533), # left 4
-    Node(358, 625), # down 11
-    Node(290, 625), # right 8
-    Node(320, 348), # right 9
-    Node(390, 348), # right 10
+    Node(152, 72), 
+    Node(190, 72), 
+    Node(152, 160), 
+    Node(53, 160),  
+    Node(53, 250),  
+    Node(152, 250),
+    Node(152, 348), 
+    Node(53, 348),  
+    Node(53, 440),  
+    Node(53, 528),  
+    Node(53, 630),  
+    Node(152, 630), 
+    Node(220, 630), 
+    Node(220, 533),       
+    Node(290, 533), 
+    Node(220, 440), 
+    Node(120, 440), 
+    Node(120, 528), 
+    Node(155, 528), 
+    Node(220, 348), 
+    Node(290, 348), 
+    Node(290, 440), 
+    Node(390, 440),
+    Node(390, 533), 
+    Node(358, 533), 
+    Node(358, 630),
+    Node(290, 630), 
+    Node(320, 348), 
+    Node(390, 348), 
     Node(390, 250),
     Node(320, 250),
     Node(223, 250),
@@ -73,6 +73,43 @@ nodes = [
     Node(525, 72),
     Node(458, 72),
     Node(458, 160),
+    Node(525, 400),
+    Node(525, 495),
+    Node(525, 585),
+    Node(525, 630),
+    Node(435, 630),
+    Node(598, 585),
+    Node(598, 630),
+    Node(668, 72),
+    Node(668, 115),
+    Node(598, 400),
+    Node(598, 495),
+    Node(598, 305),
+    Node(665, 305),
+    Node(703, 305),
+    Node(703, 260),
+    Node(703, 210),
+    Node(668, 210),
+    Node(773, 260),
+    Node(773, 210),
+    Node(810, 210),
+    Node(848, 210),
+    Node(810, 72),
+    Node(738, 72),
+    Node(738, 115),
+    Node(773, 400),
+    Node(848, 400),
+    Node(848, 305),
+    Node(848, 535),
+    Node(848, 630),
+    Node(738, 630),
+    Node(738, 585),
+    Node(665, 630),
+    Node(665, 495),
+    Node(773, 495),
+    Node(665, 400),
+    Node(703, 400),
+    Node(880, 535), # finish
 ]
 
 # Load and scale the background image
