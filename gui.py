@@ -16,7 +16,7 @@ pygame.font.init()
 font = pygame.font.SysFont("Arial", 12)
 
 # Load and scale the background image
-background = pygame.image.load("maze_bg.png")
+background = pygame.image.load("assets/maze_bg.png")
 background = pygame.transform.scale(background, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
 # Set indices for all nodes
