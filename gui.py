@@ -10,6 +10,7 @@ WINDOW_WIDTH = 900
 WINDOW_HEIGHT = 700
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("A* Pathfinding Visualization")
+pygame.display.set_icon(pygame.image.load("assets/mouse.png"))
 
 # Initialize font
 pygame.font.init()
