@@ -60,27 +60,26 @@ class Visualizer:
             sys.exit()
 
     def determine_direction(self, dx, dy):
-        if dx > 0:
-            if dy > 0:
-                return "bottom_right"
-            elif dy < 0:
-                return "top_right"
-            else:
-                return "right"
-        elif dx < 0:
-            if dy > 0:
-                return "bottom_left"
-            elif dy < 0:
-                return "top_left"
-            else:
-                return "left"
+        # dx: positive is right, negative is left
+        # dy: positive is down, negative is up (screen coordinates)
+        if dx > 0 and dy < 0:
+            return "top_right"
+        elif dx > 0 and dy > 0:
+            return "bottom_right"
+        elif dx < 0 and dy < 0:
+            return "top_left"
+        elif dx < 0 and dy > 0:
+            return "bottom_left"
+        elif dx > 0 and dy == 0:
+            return "right"
+        elif dx < 0 and dy == 0:
+            return "left"
+        elif dx == 0 and dy < 0:
+            return "top"
+        elif dx == 0 and dy > 0:
+            return "bottom"
         else:
-            if dy > 0:
-                return "bottom"
-            elif dy < 0:
-                return "top"
-            else:
-                return "right"
+            return "right"
 
     def start_animation(self, path):
         if len(path) < 2:
@@ -157,9 +156,15 @@ class Visualizer:
                 end_pos = self.current_path[self.current_segment + 1]
                 current_x = start_pos[0] + (end_pos[0] - start_pos[0]) * self.progress
                 current_y = start_pos[1] + (end_pos[1] - start_pos[1]) * self.progress
+                # Recalculate direction for smooth animation
+                dx = end_pos[0] - start_pos[0]
+                dy = end_pos[1] - start_pos[1]
+                current_direction = self.determine_direction(dx, dy)
             else:
                 current_x, current_y = self.current_path[-1]
-            rat_image = self.rat_images[self.current_direction]
+                # If at the end, keep last direction
+                current_direction = self.current_direction
+            rat_image = self.rat_images[current_direction]
             rat_rect = rat_image.get_rect(center=(current_x, current_y))
             self.screen.blit(rat_image, rat_rect)
 
