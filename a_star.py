@@ -12,6 +12,14 @@ def get_node_by_position(position):
     return None
 
 
+def restore_nodes(snapshot):
+    for node, (g, h, f, parent_idx) in zip(nodes, snapshot):
+        node.g = g
+        node.h = h
+        node.f = f
+        node.parent = nodes[parent_idx] if parent_idx is not None else None
+
+
 def a_star(start_pos, goal_pos):
     visualizer = Visualizer(nodes, start_pos, goal_pos)
 
@@ -23,6 +31,13 @@ def a_star(start_pos, goal_pos):
 
     start_node = get_node_by_position(start_pos)
     goal_node = get_node_by_position(goal_pos)
+
+    # Helper to snapshot all node values
+    def snapshot_nodes():
+        return [
+            (node.g, node.h, node.f, node.parent.index if node.parent else None)
+            for node in nodes
+        ]
 
     # Reset node costs and parents
     for node in nodes:
@@ -45,25 +60,12 @@ def a_star(start_pos, goal_pos):
     steps = []
 
     while open_heap:
-        # Remove step_log and only keep the open set log after neighbor expansion
-
         current_f, current_idx = heapq.heappop(open_heap)
         current_node = nodes[current_idx]
 
         # If this node has already been processed with a better f, skip it
         if current_node.position in closed_set:
             continue
-
-        # Save step before neighbor expansion (optional: can be removed for even less redundancy)
-        # steps.append(
-        #     (
-        #         current_node,
-        #         [nodes[i] for _, i in open_heap],
-        #         set(closed_set),
-        #         None,
-        #         [],
-        #     )
-        # )
 
         if current_node.position == goal_pos:
             path = current_node.get_path()
@@ -75,6 +77,7 @@ def a_star(start_pos, goal_pos):
                         set(closed_set),
                         path[: i + 1],
                         [f"Path step {i + 1}/{len(path)}: {path[: i + 1]}"],
+                        snapshot_nodes(),
                     )
                 )
             steps.append(
@@ -90,6 +93,7 @@ def a_star(start_pos, goal_pos):
                         "Path (from start to goal):",
                         *(str(step) for step in path),
                     ],
+                    snapshot_nodes(),
                 )
             )
             return steps
@@ -134,6 +138,7 @@ def a_star(start_pos, goal_pos):
                 set(closed_set),
                 None,
                 ["Neighbors added to open set (cyan)"] + next_nodes_log,
+                snapshot_nodes(),
             )
         )
 
@@ -154,8 +159,9 @@ if __name__ == "__main__":
     total_steps = len(steps)
     visualizer = Visualizer(nodes, start, goal)
 
-    # Print the first step log and draw once
-    current_node, open_set, closed_set, path, log_lines = steps[step_idx]
+    # Restore node values for the first step before drawing
+    current_node, open_set, closed_set, path, log_lines, node_snapshot = steps[step_idx]
+    restore_nodes(node_snapshot)
     visualizer.update_display(current_node, open_set, closed_set, path, delay=0)
     print("\n".join(log_lines))
 
@@ -168,9 +174,15 @@ if __name__ == "__main__":
             if event.key == pygame.K_RIGHT:
                 if step_idx < total_steps - 1:
                     step_idx += 1
-                    current_node, open_set, closed_set, path, log_lines = steps[
-                        step_idx
-                    ]
+                    (
+                        current_node,
+                        open_set,
+                        closed_set,
+                        path,
+                        log_lines,
+                        node_snapshot,
+                    ) = steps[step_idx]
+                    restore_nodes(node_snapshot)
                     visualizer.update_display(
                         current_node, open_set, closed_set, path, delay=0
                     )
@@ -178,9 +190,15 @@ if __name__ == "__main__":
             elif event.key == pygame.K_LEFT:
                 if step_idx > 0:
                     step_idx -= 1
-                    current_node, open_set, closed_set, path, log_lines = steps[
-                        step_idx
-                    ]
+                    (
+                        current_node,
+                        open_set,
+                        closed_set,
+                        path,
+                        log_lines,
+                        node_snapshot,
+                    ) = steps[step_idx]
+                    restore_nodes(node_snapshot)
                     visualizer.update_display(
                         current_node, open_set, closed_set, path, delay=0
                     )
