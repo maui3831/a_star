@@ -161,7 +161,6 @@ if __name__ == "__main__":
     current_node, open_set, closed_set, path, log_lines, node_snapshot = steps[step_idx]
     restore_nodes(node_snapshot)
     visualizer.update_display(current_node, open_set, closed_set, path, delay=0)
-    # Only print "Chosen node" if not a path step or final path
     if not (
         log_lines
         and (log_lines[0].startswith("Path step") or "Path found!" in log_lines[0])
@@ -195,7 +194,6 @@ if __name__ == "__main__":
                         visualizer.update_display(
                             current_node, open_set, closed_set, path, delay=0
                         )
-                        # Only print "Chosen node" if not a path step or final path
                         if not (
                             log_lines
                             and (
@@ -224,7 +222,6 @@ if __name__ == "__main__":
                         visualizer.update_display(
                             current_node, open_set, closed_set, path, delay=0
                         )
-                        # Only print "Chosen node" if not a path step or final path
                         if not (
                             log_lines
                             and (

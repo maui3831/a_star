@@ -60,8 +60,6 @@ class Visualizer:
             sys.exit()
 
     def determine_direction(self, dx, dy):
-        # dx: positive is right, negative is left
-        # dy: positive is down, negative is up (screen coordinates)
         if dx > 0 and dy < 0:
             return "top_right"
         elif dx > 0 and dy > 0:
