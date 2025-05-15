@@ -30,7 +30,8 @@ class Visualizer:
         self.bg_image = pygame.transform.scale(self.bg_image, (self.width, self.height))
         pygame.display.set_caption("A* Search Visualization")
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont(None, 18)  # Add font for node indices
+        self.font = pygame.font.SysFont(None, 18)  # Main font for f
+        self.font_small = pygame.font.SysFont(None, 13)  # Smaller font for h
 
     def draw_nodes(self, current_node, open_set, closed_set, path=None):
         # Draw background image
@@ -77,11 +78,17 @@ class Visualizer:
 
             pygame.draw.circle(self.screen, color, (x, y), CELL_SIZE)
 
-            # Draw only f value inside the circle
+            # Draw f score slightly above center
             f_val = f"{node.f:.0f}" if node.f != float("inf") else "inf"
             f_surface = self.font.render(f_val, True, (0, 0, 0))
-            f_rect = f_surface.get_rect(center=(x, y))
+            f_rect = f_surface.get_rect(center=(x, y - 5))
             self.screen.blit(f_surface, f_rect)
+
+            # Draw h score below f score, smaller font
+            h_val = f"{node.h:.0f}" if node.h != float("inf") else "inf"
+            h_surface = self.font_small.render(f"h:{h_val}", True, (0, 0, 200))
+            h_rect = h_surface.get_rect(midtop=(x, y + 7))
+            self.screen.blit(h_surface, h_rect)
 
         # Highlight current node
         if current_node:
