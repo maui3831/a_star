@@ -45,43 +45,28 @@ def a_star(start_pos, goal_pos):
     steps = []
 
     while open_heap:
-        # Print all considered nodes in the open set before choosing
-        open_candidates = sorted(open_heap)
-        step_log = []
-        step_log.append("\nOpen set candidates (before selection):")
-        for f_val, idx in open_candidates:
-            node = nodes[idx]
-            g_val = f"{node.g:.0f}" if node.g != float("inf") else "inf"
-            h_val = f"{node.h:.0f}" if node.h != float("inf") else "inf"
-            step_log.append(
-                f"  Node {node.index} at {node.position}: f={f_val:.0f}, g={g_val}, h={h_val}"
-            )
+        # Remove step_log and only keep the open set log after neighbor expansion
 
         current_f, current_idx = heapq.heappop(open_heap)
         current_node = nodes[current_idx]
-
-        step_log.append(
-            f"Chosen node: Node {current_node.index} at {current_node.position} with f={current_f:.0f}"
-        )
 
         # If this node has already been processed with a better f, skip it
         if current_node.position in closed_set:
             continue
 
-        # Save step (current_node, open_set, closed_set, path, log)
-        steps.append(
-            (
-                current_node,
-                [nodes[i] for _, i in open_heap],
-                set(closed_set),
-                None,
-                list(step_log),
-            )
-        )
+        # Save step before neighbor expansion (optional: can be removed for even less redundancy)
+        # steps.append(
+        #     (
+        #         current_node,
+        #         [nodes[i] for _, i in open_heap],
+        #         set(closed_set),
+        #         None,
+        #         [],
+        #     )
+        # )
 
         if current_node.position == goal_pos:
             path = current_node.get_path()
-            # Show the path step by step
             for i in range(len(path)):
                 steps.append(
                     (
@@ -92,7 +77,6 @@ def a_star(start_pos, goal_pos):
                         [f"Path step {i + 1}/{len(path)}: {path[: i + 1]}"],
                     )
                 )
-            # Final path found log
             steps.append(
                 (
                     current_node,
@@ -131,6 +115,27 @@ def a_star(start_pos, goal_pos):
 
                 heapq.heappush(open_heap, (neighbor_node.f, neighbor_idx))
                 open_set.add(neighbor_idx)
+
+        # Only log the open set after neighbor expansion
+        open_candidates = sorted(open_heap)
+        next_nodes_log = ["Possible next nodes after neighbor expansion:"]
+        for f_val, idx in open_candidates:
+            node = nodes[idx]
+            g_val = f"{node.g:.0f}" if node.g != float("inf") else "inf"
+            h_val = f"{node.h:.0f}" if node.h != float("inf") else "inf"
+            next_nodes_log.append(
+                f"  Node {node.index} at {node.position}: f={f_val:.0f}, g={g_val}, h={h_val}"
+            )
+
+        steps.append(
+            (
+                current_node,
+                [nodes[i] for _, i in open_heap],
+                set(closed_set),
+                None,
+                ["Neighbors added to open set (cyan)"] + next_nodes_log,
+            )
+        )
 
     return steps
 

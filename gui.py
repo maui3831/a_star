@@ -49,7 +49,7 @@ class Visualizer:
         # Print to console for logs
         if current_node:
             print(
-                f"Step: Node {getattr(current_node, 'index', '?')} at {current_node.position} -> f={f_val}, g={g_val}, h={h_val}"
+                f"\nStep: Node {getattr(current_node, 'index', '?')} at {current_node.position} -> f={f_val}, g={g_val}, h={h_val}"
             )
 
         # Draw connections (edges) between nodes
