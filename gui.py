@@ -1,186 +1,104 @@
 import pygame
-import time
-from maze import nodes, connections, AStar
+import sys
+from dataclasses import dataclass
+from typing import List, Tuple
+from node import Node
 
-# Initialize Pygame
-pygame.init()
+# Constants
+CELL_SIZE = 20
+PATH_COLOR = (255, 255, 255)  # White
+START_COLOR = (0, 255, 0)  # Green
+GOAL_COLOR = (255, 0, 0)  # Red
+OPEN_SET_COLOR = (139, 233, 253)  # Cyan
+CLOSED_SET_COLOR = (100, 100, 100)  # Dark gray
+CURRENT_NODE_COLOR = (255, 121, 198)  # Pink
+PATH_COLOR_FINAL = (255, 184, 108)  # Orange
 
-# Set up the display
-WINDOW_WIDTH = 900
-WINDOW_HEIGHT = 700
-screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption("A* Pathfinding Visualization")
 
-# Initialize font
-pygame.font.init()
-font = pygame.font.SysFont("Arial", 12)
+@dataclass
+class Visualizer:
+    nodes: List[Node]
+    start: Tuple[int, int]
+    goal: Tuple[int, int]
 
-# Load and scale the background image
-background = pygame.image.load("assets/maze_bg.png")
-background = pygame.transform.scale(background, (WINDOW_WIDTH, WINDOW_HEIGHT))
+    def __post_init__(self):
+        pygame.init()
+        self.width = 900
+        self.height = 700
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        self.bg_image = pygame.image.load("assets/maze_bg.png")
+        self.bg_image = pygame.transform.scale(self.bg_image, (self.width, self.height))
+        pygame.display.set_caption("A* Search Visualization")
+        self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont(None, 18)  # Add font for node indices
 
-# Load rat images
-rat_images = {}
-directions = ['top', 'top_right', 'right', 'bottom_right', 'bottom', 'bottom_left', 'left', 'top_left']
-try:
-    for direction in directions:
-        img = pygame.image.load(f"assets/rat/rat_{direction}.png")
-        rat_images[direction] = pygame.transform.scale(img, (72, 72))
-except Exception as e:
-    print(f"Error loading rat images: {e}")
-    pygame.quit()
-    exit()
+    def draw_nodes(self, current_node, open_set, closed_set, path=None):
+        # Draw background image
+        self.screen.blit(self.bg_image, (0, 0))
 
-# Set indices for all nodes
-for i, node in enumerate(nodes):
-    node.index = i
+        # Draw formula at the top
+        formula = "f(x) = g(x) + h(x)"
+        if current_node:
+            g_val = f"{current_node.g:.0f}" if current_node.g != float("inf") else "inf"
+            h_val = f"{current_node.h:.0f}" if current_node.h != float("inf") else "inf"
+            f_val = f"{current_node.f:.0f}" if current_node.f != float("inf") else "inf"
+            formula += f"   |   Current: f={f_val}, g={g_val}, h={h_val}"
+        formula_surface = self.font.render(formula, True, (0, 0, 0))
+        self.screen.blit(formula_surface, (20, 10))
 
-def determine_direction(dx, dy):
-    if dx > 0:
-        if dy > 0:
-            return 'bottom_right'
-        elif dy < 0:
-            return 'top_right'
-        else:
-            return 'right'
-    elif dx < 0:
-        if dy > 0:
-            return 'bottom_left'
-        elif dy < 0:
-            return 'top_left'
-        else:
-            return 'left'
-    else:
-        if dy > 0:
-            return 'bottom'
-        elif dy < 0:
-            return 'top'
-        else:
-            return 'right'  # Default case
-
-def update_node_state(node_idx, state):
-    global search_started  # Access the main loop variable
-    nodes[node_idx].state = state
-    
-    # Redraw everything
-    screen.blit(background, (0, 0))
-    
-    # Draw connections
-    for idx, neighbors in connections.items():
-        start_node = nodes[idx]
-        for neighbor_idx in neighbors:
-            end_node = nodes[neighbor_idx]
-            pygame.draw.line(screen, (0, 0, 0), (start_node.x, start_node.y), (end_node.x, end_node.y), 2)
-    
-    # Draw nodes
-    for node in nodes:
-        node.draw(screen)
-    
-    # Draw rat on start node DURING SEARCH
-    if search_started:
-        # draw the rat on the start node
-        start_node = nodes[0] 
-        # facing at start in right
-        rat_img = rat_images['right'] 
-        rat_rect = rat_img.get_rect(center=(start_node.x, start_node.y))
-        screen.blit(rat_img, rat_rect)
-    
-    pygame.display.flip()
-    time.sleep(0.1)
-
-# Main game loop
-clock = pygame.time.Clock()
-running = True
-astar = None
-search_started = False
-
-# Animation variables
-animating = False
-current_path = []
-current_segment = 0
-current_rat_image = None
-start_pos = (0, 0)
-end_pos = (0, 0)
-progress = 0.0
-animation_speed = 1.0  # Adjust speed as needed
-
-while running:
-    delta_time = clock.tick(60) / 1000.0  # Delta time in seconds
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE and not search_started:
-                # Start A* search from node 0 to the last node
-                astar = AStar(0, len(nodes) - 1)
-                search_started = True
-                # Run the search with visualization
-                path = astar.search(update_node_state)
-                if path:
-                    print(f"Path found: {path}")
-                    current_path = path
-                    if len(current_path) >= 2:
-                        animating = True
-                        current_segment = 0
-                        start_node = nodes[current_path[0]]
-                        end_node = nodes[current_path[1]]
-                        start_pos = (start_node.x, start_node.y)
-                        end_pos = (end_node.x, end_node.y)
-                        dx = end_node.x - start_node.x
-                        dy = end_node.y - start_node.y
-                        current_rat_image = rat_images[determine_direction(dx, dy)]
-                        progress = 0.0
-                else:
-                    print("No path found")
-
-    # Update animation
-    if animating:
-        progress += animation_speed * delta_time
-        if progress >= 1.0:
-            current_segment += 1
-            if current_segment >= len(current_path) - 1:
-                animating = False
-                current_rat_image = rat_images[determine_direction(0, 0)]
-                start_pos = (end_node.x, end_node.y)
-            else:
-                start_node = nodes[current_path[current_segment]]
-                end_node = nodes[current_path[current_segment + 1]]
-                start_pos = (start_node.x, start_node.y)
-                end_pos = (end_node.x, end_node.y)
-                dx = end_node.x - start_node.x
-                dy = end_node.y - start_node.y
-                current_rat_image = rat_images[determine_direction(dx, dy)]
-                progress = 0.0
-
-    # Draw the background
-    screen.blit(background, (0, 0))
-
-    # Draw connections
-    for node_idx, neighbors in connections.items():
-        start_node = nodes[node_idx]
-        for neighbor_idx in neighbors:
-            end_node = nodes[neighbor_idx]
-            pygame.draw.line(
-                screen,
-                (0, 0, 0),
-                (start_node.x, start_node.y),
-                (end_node.x, end_node.y),
-                2,
+        # Print to console for logs
+        if current_node:
+            print(
+                f"Step: Node {getattr(current_node, 'index', '?')} at {current_node.position} -> f={f_val}, g={g_val}, h={h_val}"
             )
 
-    # Draw all nodes
-    for node in nodes:
-        node.draw(screen)
+        # Draw connections (edges) between nodes
+        for node in self.nodes:
+            x1, y1 = node.position
+            for neighbor_idx in node.neighbors:
+                neighbor = self.nodes[neighbor_idx]
+                x2, y2 = neighbor.position
+                pygame.draw.line(self.screen, (180, 180, 180), (x1, y1), (x2, y2), 2)
 
-    # Draw rat
-    if animating and current_rat_image:
-        current_x = start_pos[0] + (end_pos[0] - start_pos[0]) * progress
-        current_y = start_pos[1] + (end_pos[1] - start_pos[1]) * progress
-        rat_rect = current_rat_image.get_rect(center=(current_x, current_y))
-        screen.blit(current_rat_image, rat_rect)
+        # Draw all nodes
+        for node in self.nodes:
+            x, y = node.position
+            color = PATH_COLOR
+            if node.position == self.start:
+                color = START_COLOR
+            elif node.position == self.goal:
+                color = GOAL_COLOR
+            elif path and (x, y) in path:
+                color = PATH_COLOR_FINAL
+            elif node.position in closed_set:
+                color = CLOSED_SET_COLOR
+            elif node in open_set:
+                color = OPEN_SET_COLOR
 
-    pygame.display.flip()
+            pygame.draw.circle(self.screen, color, (x, y), CELL_SIZE)
 
-# Quit Pygame
-pygame.quit()
+            # Draw only f value inside the circle
+            f_val = f"{node.f:.0f}" if node.f != float("inf") else "inf"
+            f_surface = self.font.render(f_val, True, (0, 0, 0))
+            f_rect = f_surface.get_rect(center=(x, y))
+            self.screen.blit(f_surface, f_rect)
+
+        # Highlight current node
+        if current_node:
+            x, y = current_node.position
+            pygame.draw.circle(
+                self.screen,
+                CURRENT_NODE_COLOR,
+                (x, y),
+                CELL_SIZE,
+            )
+
+        pygame.display.flip()
+
+    def update_display(self, current_node, open_set, closed_set, path=None, delay=400):
+        self.draw_nodes(current_node, open_set, closed_set, path)
+        pygame.time.delay(delay)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
