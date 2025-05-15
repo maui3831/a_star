@@ -6,11 +6,11 @@ from node import Node
 
 # Constants
 CELL_SIZE = 20
-PATH_COLOR = (255, 255, 255)  # White
-START_COLOR = (0, 255, 0)  # Green
-GOAL_COLOR = (255, 0, 0)  # Red
+PATH_COLOR = (248, 248, 242)  # White
+START_COLOR = (80, 250, 123)  # Green
+GOAL_COLOR = (241, 250, 140)  # Yellow
 OPEN_SET_COLOR = (139, 233, 253)  # Cyan
-CLOSED_SET_COLOR = (100, 100, 100)  # Dark gray
+CLOSED_SET_COLOR = (68, 71, 90)  # Dark gray
 CURRENT_NODE_COLOR = (255, 121, 198)  # Pink
 PATH_COLOR_FINAL = (255, 184, 108)  # Orange
 
@@ -111,13 +111,22 @@ class Visualizer:
         text_surface = self.font.render(formula, True, text_color)
         self.screen.blit(text_surface, (x, y))
 
+        if self.animating:
+            alpha = 100
+            temp_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        else:
+            temp_surface = self.screen
+
+        # Draw lines between nodes
         for node in self.nodes:
             x1, y1 = node.position
             for neighbor_idx in node.neighbors:
                 neighbor = self.nodes[neighbor_idx]
                 x2, y2 = neighbor.position
-                pygame.draw.line(self.screen, (180, 180, 180), (x1, y1), (x2, y2), 2)
+                color = (180, 180, 180, alpha) if self.animating else (180, 180, 180)
+                pygame.draw.line(temp_surface, color, (x1, y1), (x2, y2), 2)
 
+        # Draw nodes
         for node in self.nodes:
             x, y = node.position
             color = PATH_COLOR
@@ -132,21 +141,31 @@ class Visualizer:
             elif node in open_set:
                 color = OPEN_SET_COLOR
 
-            pygame.draw.circle(self.screen, color, (x, y), CELL_SIZE)
+            draw_color = (*color, alpha) if self.animating else color
+            pygame.draw.circle(temp_surface, draw_color, (x, y), CELL_SIZE)
 
             f_val = f"{node.f:.0f}" if node.f != float("inf") else "inf"
             f_surface = self.font.render(f_val, True, (0, 0, 0))
             f_rect = f_surface.get_rect(center=(x, y - 5))
-            self.screen.blit(f_surface, f_rect)
+            temp_surface.blit(f_surface, f_rect)
 
             h_val = f"{node.h:.0f}" if node.h != float("inf") else "inf"
             h_surface = self.font_small.render(f"h:{h_val}", True, (0, 0, 200))
             h_rect = h_surface.get_rect(midtop=(x, y + 7))
-            self.screen.blit(h_surface, h_rect)
+            temp_surface.blit(h_surface, h_rect)
+
+        if self.animating:
+            self.screen.blit(temp_surface, (0, 0))
 
         if current_node:
             x, y = current_node.position
-            pygame.draw.circle(self.screen, CURRENT_NODE_COLOR, (x, y), CELL_SIZE)
+            # Only draw the current node highlight if not animating or not at the end of animation
+            if not (
+                self.animating
+                and self.current_path
+                and current_node.position == self.goal
+            ):
+                pygame.draw.circle(self.screen, CURRENT_NODE_COLOR, (x, y), CELL_SIZE)
 
         if self.animating and self.current_path:
             if self.current_segment < len(self.current_path) - 1:
