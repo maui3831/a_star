@@ -215,13 +215,15 @@ if __name__ == "__main__":
                     end_pos = visualizer.current_path[visualizer.current_segment + 1]
                     dx = end_pos[0] - start_pos[0]
                     dy = end_pos[1] - start_pos[1]
-                    visualizer.current_direction = visualizer.determine_direction(dx, dy)
+                    visualizer.current_direction = visualizer.determine_direction(
+                        dx, dy
+                    )
                     visualizer.progress = 0.0
             visualizer.draw_nodes(
                 visualizer.current_node,
                 visualizer.open_set,
                 visualizer.closed_set,
-                visualizer.path
+                visualizer.path,
             )
 
         pygame.display.flip()

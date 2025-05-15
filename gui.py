@@ -1,7 +1,7 @@
 import pygame
 import sys
 from dataclasses import dataclass
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 from node import Node
 
 # Constants
@@ -35,12 +35,21 @@ class Visualizer:
         self.load_rat_images()
         self.animating = False
         self.current_path = []
-        self.animation_speed = 1.0 
+        self.animation_speed = 1.0
         pygame.display.set_icon(pygame.image.load("assets/mouse.png"))
 
     def load_rat_images(self):
         self.rat_images = {}
-        directions = ['top', 'top_right', 'right', 'bottom_right', 'bottom', 'bottom_left', 'left', 'top_left']
+        directions = [
+            "top",
+            "top_right",
+            "right",
+            "bottom_right",
+            "bottom",
+            "bottom_left",
+            "left",
+            "top_left",
+        ]
         try:
             for direction in directions:
                 img = pygame.image.load(f"assets/rat/rat_{direction}.png")
@@ -53,25 +62,25 @@ class Visualizer:
     def determine_direction(self, dx, dy):
         if dx > 0:
             if dy > 0:
-                return 'bottom_right'
+                return "bottom_right"
             elif dy < 0:
-                return 'top_right'
+                return "top_right"
             else:
-                return 'right'
+                return "right"
         elif dx < 0:
             if dy > 0:
-                return 'bottom_left'
+                return "bottom_left"
             elif dy < 0:
-                return 'top_left'
+                return "top_left"
             else:
-                return 'left'
+                return "left"
         else:
             if dy > 0:
-                return 'bottom'
+                return "bottom"
             elif dy < 0:
-                return 'top'
+                return "top"
             else:
-                return 'right'
+                return "right"
 
     def start_animation(self, path):
         if len(path) < 2:
@@ -95,7 +104,7 @@ class Visualizer:
             h_val = f"{current_node.h:.0f}" if current_node.h != float("inf") else "inf"
             f_val = f"{current_node.f:.0f}" if current_node.f != float("inf") else "inf"
             formula += f"   |   Current: f={f_val}, g={g_val}, h={h_val}"
-        
+
         x, y = 20, 10
         outline_color = (0, 0, 0)
         text_color = (255, 255, 255)
