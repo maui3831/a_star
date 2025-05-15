@@ -30,14 +30,12 @@ def a_star(start_pos, goal_pos):
     start_node = get_node_by_position(start_pos)
     goal_node = get_node_by_position(goal_pos)
 
-    # Helper to snapshot all node values
     def snapshot_nodes():
         return [
             (node.g, node.h, node.f, node.parent.index if node.parent else None)
             for node in nodes
         ]
 
-    # Reset node costs and parents
     for node in nodes:
         node.g = float("inf")
         node.h = 0
@@ -54,14 +52,12 @@ def a_star(start_pos, goal_pos):
     heapq.heappush(open_heap, (start_node.f, start_node.h, start_node.index))
     open_set.add(start_node.index)
 
-    # Collect steps for visualization
     steps = []
 
     while open_heap:
         current_f, current_h, current_idx = heapq.heappop(open_heap)
         current_node = nodes[current_idx]
 
-        # If this node has already been processed with a better f, skip it
         if current_node.position in closed_set:
             continue
 
@@ -120,7 +116,6 @@ def a_star(start_pos, goal_pos):
                 )
                 open_set.add(neighbor_idx)
 
-        # Only log the open set after neighbor expansion
         open_candidates = sorted(open_heap)
         next_nodes_log = ["Possible next nodes after neighbor expansion:"]
         for f_val, h_val, idx in open_candidates:
@@ -146,9 +141,8 @@ def a_star(start_pos, goal_pos):
 
 
 if __name__ == "__main__":
-    # Select start and goal from nodes
-    start = nodes[0].position  # First node
-    goal = nodes[-1].position  # Last node
+    start = nodes[0].position
+    goal = nodes[-1].position
 
     steps = a_star(start, goal)
     if not steps:
@@ -159,48 +153,75 @@ if __name__ == "__main__":
     total_steps = len(steps)
     visualizer = Visualizer(nodes, start, goal)
 
-    # Restore node values for the first step before drawing
     current_node, open_set, closed_set, path, log_lines, node_snapshot = steps[step_idx]
     restore_nodes(node_snapshot)
     visualizer.update_display(current_node, open_set, closed_set, path, delay=0)
     print("\n".join(log_lines))
 
+    clock = pygame.time.Clock()
     while True:
-        event = pygame.event.wait()
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:
-                if step_idx < total_steps - 1:
-                    step_idx += 1
-                    (
-                        current_node,
-                        open_set,
-                        closed_set,
-                        path,
-                        log_lines,
-                        node_snapshot,
-                    ) = steps[step_idx]
-                    restore_nodes(node_snapshot)
-                    visualizer.update_display(
-                        current_node, open_set, closed_set, path, delay=0
-                    )
-                    print("\n".join(log_lines))
-            elif event.key == pygame.K_LEFT:
-                if step_idx > 0:
-                    step_idx -= 1
-                    (
-                        current_node,
-                        open_set,
-                        closed_set,
-                        path,
-                        log_lines,
-                        node_snapshot,
-                    ) = steps[step_idx]
-                    restore_nodes(node_snapshot)
-                    visualizer.update_display(
-                        current_node, open_set, closed_set, path, delay=0
-                    )
-                    print("\n".join(log_lines))
-        # No need for pygame.time.delay here, as we wait for events
+        delta_time = clock.tick(60) / 1000.0
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    if step_idx < total_steps - 1:
+                        step_idx += 1
+                        (
+                            current_node,
+                            open_set,
+                            closed_set,
+                            path,
+                            log_lines,
+                            node_snapshot,
+                        ) = steps[step_idx]
+                        restore_nodes(node_snapshot)
+                        visualizer.update_display(
+                            current_node, open_set, closed_set, path, delay=0
+                        )
+                        print("\n".join(log_lines))
+                        if step_idx == total_steps - 1 and path:
+                            visualizer.start_animation(path)
+                elif event.key == pygame.K_LEFT:
+                    if step_idx > 0:
+                        step_idx -= 1
+                        (
+                            current_node,
+                            open_set,
+                            closed_set,
+                            path,
+                            log_lines,
+                            node_snapshot,
+                        ) = steps[step_idx]
+                        restore_nodes(node_snapshot)
+                        visualizer.update_display(
+                            current_node, open_set, closed_set, path, delay=0
+                        )
+                        print("\n".join(log_lines))
+                        visualizer.animating = False
+
+        if visualizer.animating:
+            visualizer.progress += visualizer.animation_speed * delta_time
+            if visualizer.progress >= 1.0:
+                visualizer.current_segment += 1
+                if visualizer.current_segment >= len(visualizer.current_path) - 1:
+                    visualizer.animating = False
+                    visualizer.progress = 1.0
+                else:
+                    start_pos = visualizer.current_path[visualizer.current_segment]
+                    end_pos = visualizer.current_path[visualizer.current_segment + 1]
+                    dx = end_pos[0] - start_pos[0]
+                    dy = end_pos[1] - start_pos[1]
+                    visualizer.current_direction = visualizer.determine_direction(dx, dy)
+                    visualizer.progress = 0.0
+            visualizer.draw_nodes(
+                visualizer.current_node,
+                visualizer.open_set,
+                visualizer.closed_set,
+                visualizer.path
+            )
+
+        pygame.display.flip()
