@@ -3,6 +3,7 @@ from gui import Visualizer
 from node import Node, nodes
 import pygame
 import sys
+from rich import print
 
 
 def get_node_by_position(position):
@@ -74,6 +75,10 @@ def a_star(start_pos, goal_pos):
                         snapshot_nodes(),
                     )
                 )
+            path_with_indices = [
+                f"Node {next(n.index for n in nodes if n.position == step)}: {step} "
+                for step in path
+            ]
             steps.append(
                 (
                     current_node,
@@ -85,7 +90,7 @@ def a_star(start_pos, goal_pos):
                         f"Path length: {len(path)}",
                         f"Total cost (g): {current_node.g}",
                         "Path (from start to goal):",
-                        *(str(step) for step in path),
+                        *path_with_indices,
                     ],
                     snapshot_nodes(),
                 )
@@ -132,7 +137,7 @@ def a_star(start_pos, goal_pos):
                 [nodes[i] for _, _, i in open_heap],
                 set(closed_set),
                 None,
-                ["Neighbors added to open set (cyan)"] + next_nodes_log,
+                next_nodes_log,
                 snapshot_nodes(),
             )
         )
@@ -156,6 +161,9 @@ if __name__ == "__main__":
     current_node, open_set, closed_set, path, log_lines, node_snapshot = steps[step_idx]
     restore_nodes(node_snapshot)
     visualizer.update_display(current_node, open_set, closed_set, path, delay=0)
+    print(
+        f"\nChosen node: {current_node.index} at {current_node.position} (f={current_node.f:.0f}, g={current_node.g:.0f}, h={current_node.h:.0f})"
+    )
     print("\n".join(log_lines))
 
     clock = pygame.time.Clock()
@@ -182,6 +190,9 @@ if __name__ == "__main__":
                         visualizer.update_display(
                             current_node, open_set, closed_set, path, delay=0
                         )
+                        print(
+                            f"\nChosen node: {current_node.index} at {current_node.position} (f={current_node.f:.0f}, g={current_node.g:.0f}, h={current_node.h:.0f})"
+                        )
                         print("\n".join(log_lines))
                         if step_idx == total_steps - 1 and path:
                             visualizer.start_animation(path)
@@ -200,6 +211,9 @@ if __name__ == "__main__":
                         visualizer.update_display(
                             current_node, open_set, closed_set, path, delay=0
                         )
+                        print(
+                            f"\nChosen node: {current_node.index} at {current_node.position} (f={current_node.f:.0f}, g={current_node.g:.0f}, h={current_node.h:.0f})"
+                        )
                         print("\n".join(log_lines))
                         visualizer.animating = False
 
@@ -214,7 +228,8 @@ if __name__ == "__main__":
                     start_pos = visualizer.current_path[visualizer.current_segment]
                     end_pos = visualizer.current_path[visualizer.current_segment + 1]
                     dx = end_pos[0] - start_pos[0]
-                    dy = end_pos[1] - start_pos[1]
+                    dy = end_pos[1]
+                    -start_pos[1]
                     visualizer.current_direction = visualizer.determine_direction(
                         dx, dy
                     )
