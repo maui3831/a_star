@@ -44,8 +44,19 @@ class Visualizer:
             h_val = f"{current_node.h:.0f}" if current_node.h != float("inf") else "inf"
             f_val = f"{current_node.f:.0f}" if current_node.f != float("inf") else "inf"
             formula += f"   |   Current: f={f_val}, g={g_val}, h={h_val}"
-        formula_surface = self.font.render(formula, True, (0, 0, 0))
-        self.screen.blit(formula_surface, (20, 10))
+         # Render outline text (black) at 8 directions
+        outline_color = (0, 0, 0)
+        text_color = (255, 255, 255)
+        x, y = 20, 10
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            for dy in [-1, 0, 1]:
+                if dx != 0 or dy != 0:
+                    shadow = self.font.render(formula, True, outline_color)
+                    self.screen.blit(shadow, (x + dx, y + dy))
+
+        # Render main text (white)
+        text_surface = self.font.render(formula, True, text_color)
+        self.screen.blit(text_surface, (x, y))
 
         # Print to console for logs
         if current_node:
