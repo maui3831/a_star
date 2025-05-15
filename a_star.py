@@ -161,9 +161,14 @@ if __name__ == "__main__":
     current_node, open_set, closed_set, path, log_lines, node_snapshot = steps[step_idx]
     restore_nodes(node_snapshot)
     visualizer.update_display(current_node, open_set, closed_set, path, delay=0)
-    print(
-        f"\nChosen node: {current_node.index} at {current_node.position} (f={current_node.f:.0f}, g={current_node.g:.0f}, h={current_node.h:.0f})"
-    )
+    # Only print "Chosen node" if not a path step or final path
+    if not (
+        log_lines
+        and (log_lines[0].startswith("Path step") or "Path found!" in log_lines[0])
+    ):
+        print(
+            f"\nChosen node: {current_node.index} at {current_node.position} (f={current_node.f:.0f}, g={current_node.g:.0f}, h={current_node.h:.0f})"
+        )
     print("\n".join(log_lines))
 
     clock = pygame.time.Clock()
@@ -190,9 +195,17 @@ if __name__ == "__main__":
                         visualizer.update_display(
                             current_node, open_set, closed_set, path, delay=0
                         )
-                        print(
-                            f"\nChosen node: {current_node.index} at {current_node.position} (f={current_node.f:.0f}, g={current_node.g:.0f}, h={current_node.h:.0f})"
-                        )
+                        # Only print "Chosen node" if not a path step or final path
+                        if not (
+                            log_lines
+                            and (
+                                log_lines[0].startswith("Path step")
+                                or "Path found!" in log_lines[0]
+                            )
+                        ):
+                            print(
+                                f"\nChosen node: {current_node.index} at {current_node.position} (f={current_node.f:.0f}, g={current_node.g:.0f}, h={current_node.h:.0f})"
+                            )
                         print("\n".join(log_lines))
                         if step_idx == total_steps - 1 and path:
                             visualizer.start_animation(path)
@@ -211,9 +224,17 @@ if __name__ == "__main__":
                         visualizer.update_display(
                             current_node, open_set, closed_set, path, delay=0
                         )
-                        print(
-                            f"\nChosen node: {current_node.index} at {current_node.position} (f={current_node.f:.0f}, g={current_node.g:.0f}, h={current_node.h:.0f})"
-                        )
+                        # Only print "Chosen node" if not a path step or final path
+                        if not (
+                            log_lines
+                            and (
+                                log_lines[0].startswith("Path step")
+                                or "Path found!" in log_lines[0]
+                            )
+                        ):
+                            print(
+                                f"\nChosen node: {current_node.index} at {current_node.position} (f={current_node.f:.0f}, g={current_node.g:.0f}, h={current_node.h:.0f})"
+                            )
                         print("\n".join(log_lines))
                         visualizer.animating = False
 
