@@ -36,6 +36,7 @@ class Visualizer:
         self.animating = False
         self.current_path = []
         self.animation_speed = 1.0 
+        pygame.display.set_icon(pygame.image.load("assets/mouse.png"))
 
     def load_rat_images(self):
         self.rat_images = {}
