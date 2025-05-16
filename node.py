@@ -1,35 +1,40 @@
 from dataclasses import dataclass, field
 from typing import Tuple, List
 
-
+# Node class representing a point in the graph
+# Used for A* pathfinding algorithm
 @dataclass(order=True)
 class Node:
     index: int = field(init=False)  # Unique identifier for the node
-    position: Tuple[int, int]  # (x, y)
-    g: float = 0.0
-    h: float = 0.0
-    f: float = field(init=False)
+    position: Tuple[int, int]  # (x, y) coordinates in the visualization
+    g: float = 0.0  # Cost from start node to this node
+    h: float = 0.0  # Heuristic cost from this node to goal
+    f: float = field(init=False)  # Total cost (g + h)
     neighbors: List[int] = field(default_factory=list)  # Indices of connected nodes
+    parent: 'Node' = None  # Parent node for path reconstruction
 
     def __post_init__(self):
+        # Calculate total cost (f) when node is initialized
         self.f = self.g + self.h
 
-    # Heuristic function
+    # Calculate Manhattan distance between two nodes
+    # Used as the heuristic function for A*
     @staticmethod
     def manhattan_distance(node1: "Node", node2: "Node") -> float:
         x1, y1 = node1.position
         x2, y2 = node2.position
         return abs(x1 - x2) + abs(y1 - y2)
 
+    # Reconstruct path from start to current node using parent pointers
     def get_path(self) -> list[Tuple[int, int]]:
         path = []
         current_node = self
         while current_node is not None:
             path.append(current_node.position)
             current_node = current_node.parent
-        return path[::-1]
+        return path[::-1]  
 
-
+# Define the graph structure with nodes and their positions
 nodes = [
     Node((53, 72)),  # start node
     Node((152, 72)),
@@ -117,13 +122,14 @@ nodes = [
     Node((773, 495)),
     Node((665, 400)),
     Node((703, 400)),
-    Node((880, 535)),
+    Node((880, 535)),  # goal node
 ]
 
 # Assign unique indices to each node
 for index, node in enumerate(nodes):
     node.index = index
 
+# Define connections between nodes
 connections = {
     0: [1],
     1: [0, 2, 3],
