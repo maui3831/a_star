@@ -179,7 +179,7 @@ if __name__ == "__main__":
     # Initialize visualization
     step_idx = 0
     total_steps = len(steps)
-    visualizer = Visualizer(nodes, start, goal)
+    visualizer = Visualizer(nodes, start, goal, algorithm_name="A* Search")
 
     # Display initial state
     current_node, open_set, closed_set, path, log_lines, node_snapshot = steps[step_idx]

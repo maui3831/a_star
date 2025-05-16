@@ -20,6 +20,7 @@ class Visualizer:
     nodes: List[Node]  # List of all nodes in the graph
     start: Tuple[int, int]  # Start position coordinates
     goal: Tuple[int, int]  # Goal position coordinates
+    algorithm_name: str = "Pathfinding Visualization" # Default title
 
     def __post_init__(self):
         # Initialize Pygame and set up the display
@@ -29,7 +30,7 @@ class Visualizer:
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.bg_image = pygame.image.load("assets/maze_bg.png")
         self.bg_image = pygame.transform.scale(self.bg_image, (self.width, self.height))
-        pygame.display.set_caption("A* Search Visualization")
+        pygame.display.set_caption(f"{self.algorithm_name} - Step-by-Step") # Use the algorithm name in caption
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont(None, 18)  
         self.font_small = pygame.font.SysFont(None, 13)  

@@ -20,10 +20,10 @@ def restore_nodes(snapshot):
 
 def breadth_first_search(start_pos, goal_pos):
     # Initialize data structures
-    queue = deque()  # Queue for BFS
-    visited = set()  # Stores positions of nodes POPPED from queue (becomes closed_set)
-    in_queue_set = set() # Stores positions of nodes CURRENTLY IN queue for quick lookup
-    g_score = {}  # Cost from start to current node
+    queue = deque()  
+    visited = set() 
+    in_queue_set = set() 
+    g_score = {}  
 
     # Get start and goal nodes
     start_node = get_node_by_position(start_pos)
@@ -53,10 +53,10 @@ def breadth_first_search(start_pos, goal_pos):
 
     # Record initial state: start_node is in queue, nothing visited (explored)
     steps = [(
-        None,  # No current_node yet
-        list(queue),  # open_set: Queue contains only start_node
-        set(visited),  # closed_set: Visited (explored) is empty
-        None,  # No path yet
+        None,  
+        list(queue), 
+        set(visited),  
+        None, 
         ["Initial state: Start node added to queue. Nothing explored yet."],
         snapshot_nodes(),
     )]
@@ -84,8 +84,7 @@ def breadth_first_search(start_pos, goal_pos):
             # Record path visualization steps
             for i in range(len(path)):
                 steps.append((
-                    current_node, # Keep current_node as context, or use path[i] node?
-                                  # For consistency, use current_node that found goal.
+                    current_node, 
                     list(queue),
                     set(visited),
                     path[: i + 1],
@@ -147,8 +146,8 @@ def breadth_first_search(start_pos, goal_pos):
 
         steps.append((
             current_node,
-            list(queue), # open_set
-            set(visited), # closed_set (nodes popped and processed)
+            list(queue), 
+            set(visited), 
             None,
             log_message,
             snapshot_nodes(),
@@ -180,7 +179,7 @@ if __name__ == "__main__":
     # Initialize visualization
     step_idx = 0
     total_steps = len(steps)
-    visualizer = Visualizer(nodes, start, goal)
+    visualizer = Visualizer(nodes, start, goal, algorithm_name="Breadth-First Search")
 
     # Display initial state
     current_node, open_set, closed_set, path, log_lines, node_snapshot = steps[step_idx]
